@@ -1,12 +1,15 @@
-import ProgressWatch from "./components/stopwatch";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./App.css";
+import Dashboard from "./views/dashboard";
+import TaskList from "./views/tasks";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Stopwatch */}
-        <ProgressWatch />
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/tasks" element={<TaskList />} />
+      </Routes>
+    </Router>
   );
 }

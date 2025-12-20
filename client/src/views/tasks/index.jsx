@@ -1,7 +1,7 @@
 import React from "react";
 
-const index = () => {
-  return <div></div>;
+const TaskList = () => {
+  return <div>TaskList</div>;
 };
 
-export default index;
+export default TaskList;
