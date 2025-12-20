@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStopwatch } from "../hooks/useStopwatch";
 
-export default function ProgressWatch() {
+export default function ProgressWatch({ task, onClose }) {
   const [view, setView] = useState("RUNNING");
   const [learning, setLearning] = useState({
     today: "",
@@ -12,8 +12,22 @@ export default function ProgressWatch() {
     setView("FINISHED");
   };
 
-  const { time, isRunning, start, pause, reset } = useStopwatch(2 , onFinish);
+  const { time, isRunning, start, pause, reset } = useStopwatch(2, onFinish);
 
+  // start timer automatically when a task is selected, cleanup on unmount or deselect
+  useEffect(() => {
+    if (task) {
+      setView("RUNNING");
+      start();
+    }
+    return () => {
+      pause();
+      reset();
+      setLearning({ today: "", tomorrow: "" });
+      setView("RUNNING");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task]);
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
 
@@ -24,56 +38,82 @@ export default function ProgressWatch() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="bg-slate-800 text-white rounded-2xl p-8 w-96">
-        {/* ---------------- RUNNING ---------------- */}
-        {view === "RUNNING" && (
-          <>
-            <TimerUI
-              minutes={minutes}
-              seconds={seconds}
-              isRunning={isRunning}
-              start={start}
-              pause={pause}
-            />
-          </>
-        )}
+    <div className="bg-slate-800 text-white rounded-2xl p-6 w-full">
+      {/* Task header */}
+      {task && (
+        <div className="flex justify-between items-center mb-3">
+          <div className="font-semibold">{task.title}</div>
+          {onClose && (
+            <button
+              className="text-slate-300 hover:text-white"
+              onClick={onClose}
+              aria-label="Close timer"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      )}
 
-        {/* ---------------- FINISHED ---------------- */}
-        {view === "FINISHED" && (
-          <>
-            <p className="text-center text-green-400 mb-4">⏱ Timer Completed</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setView("ADD_LEARNING")}
-                className="flex-1 bg-blue-500 rounded-lg py-2"
-              >
-                Add Learning
-              </button>
-              <button
-                onClick={() => setView("COMPLETED")}
-                className="flex-1 bg-green-500 rounded-lg py-2"
-              >
-                Complete
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* ---------------- ADD LEARNING ---------------- */}
-        {view === "ADD_LEARNING" && (
-          <LearningForm
-            learning={learning}
-            setLearning={setLearning}
-            onSubmit={handleSubmitLearning}
+      {/* ---------------- RUNNING ---------------- */}
+      {view === "RUNNING" && (
+        <>
+          <TimerUI
+            minutes={minutes}
+            seconds={seconds}
+            isRunning={isRunning}
+            start={start}
+            pause={pause}
           />
-        )}
+        </>
+      )}
 
-        {/* ---------------- COMPLETED ---------------- */}
-        {view === "COMPLETED" && (
-          <p className="text-center text-green-400">✅ Task Completed</p>
-        )}
-      </div>
+      {/* ---------------- FINISHED ---------------- */}
+      {view === "FINISHED" && (
+        <>
+          <p className="text-center text-green-400 mb-4">⏱ Timer Completed</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setView("ADD_LEARNING")}
+              className="flex-1 bg-blue-500 rounded-lg py-2"
+            >
+              Add Learning
+            </button>
+            <button
+              onClick={() => {
+                setView("COMPLETED");
+              }}
+              className="flex-1 bg-green-500 rounded-lg py-2"
+            >
+              Complete
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ---------------- ADD LEARNING ---------------- */}
+      {view === "ADD_LEARNING" && (
+        <LearningForm
+          learning={learning}
+          setLearning={setLearning}
+          onSubmit={handleSubmitLearning}
+        />
+      )}
+
+      {/* ---------------- COMPLETED ---------------- */}
+      {view === "COMPLETED" && (
+        <div>
+          <p className="text-center text-green-400 mb-4">✅ Task Completed</p>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="w-full bg-slate-600 py-2 rounded-lg"
+            >
+              Close
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
