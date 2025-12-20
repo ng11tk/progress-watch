@@ -13,10 +13,16 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <section className="bg-slate-800 text-white rounded-2xl p-6 w-full max-w-2xl">
-        <h2 className="text-xl mb-3">Today's Tasks ({todaysTasks.length})</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <a href="/summary" className="text-sm text-slate-300 underline">
+          View Summary
+        </a>
+      </div>
 
+      <section className="bg-slate-800 text-white rounded-2xl p-6 w-full max-w-2xl">
+        {" "}
+        <h2 className="text-xl mb-3">Today's Tasks ({todaysTasks.length})</h2>
         {todaysTasks.length === 0 ? (
           <p className="text-slate-400">No tasks scheduled for today.</p>
         ) : (

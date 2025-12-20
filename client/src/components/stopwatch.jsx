@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useStopwatch } from "../hooks/useStopwatch";
+import { useTasks } from "../contexts/useTasks";
 
 export default function ProgressWatch({ task, onClose, onTaskComplete }) {
   const [view, setView] = useState("RUNNING");
@@ -7,6 +8,8 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
     today: "",
     tomorrow: "",
   });
+
+  const { addLearning } = useTasks();
 
   const startingSeconds = (task?.duration ?? 25) * 60; // convert minutes -> seconds
   const { time, isRunning, start, pause, reset } = useStopwatch(
@@ -16,7 +19,7 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
 
   function onFinish() {
     setView("FINISHED");
-    // ensure stopwatch is stopped and notify parent that task completed
+    // ensure stopwatch is stopped and mark task completed (keep modal open so user can add learning)
     try {
       pause();
     } catch {
@@ -28,7 +31,16 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
   const seconds = time % 60;
 
   const handleSubmitLearning = () => {
-    console.log("Learning:", learning);
+    // store learning for the task, prefer using the task's completed date if available
+    addLearning({
+      taskId: task?.id,
+      today: learning.today,
+      tomorrow: learning.tomorrow,
+      date: task?.completedAt
+        ? task.completedAt.slice(0, 10)
+        : new Date().toISOString().slice(0, 10),
+    });
+
     reset();
     setView("FINISHED");
   };
