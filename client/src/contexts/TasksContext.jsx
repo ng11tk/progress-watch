@@ -111,13 +111,13 @@ export function TasksProvider({ children }) {
     return `${y}-${m}-${day}`;
   }
 
-  const addLearning = ({ taskId, today, tomorrow, date }) => {
+  const addLearning = ({ taskId, today, tomorrow, date, duration }) => {
     const task = tasks.find((t) => t.id === taskId);
     const entry = {
       id: Date.now(),
       taskId,
       taskTitle: task?.title || "",
-      duration: task?.duration || 0,
+      duration: typeof duration === "number" ? duration : task?.duration || 0,
       today: today || "",
       tomorrow: tomorrow || "",
       date: date || toLocalDateYYYYMMDD(new Date()), // YYYY-MM-DD local

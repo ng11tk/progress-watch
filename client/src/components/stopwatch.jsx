@@ -17,7 +17,16 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
     onFinish
   );
 
+  function computeElapsedMinutes() {
+    const elapsedSeconds = Math.max(0, Math.round(startingSeconds - time));
+    return Math.max(0, Math.ceil(elapsedSeconds / 60));
+  }
+
   function onFinish() {
+    // set learning duration from elapsed time before changing view/state
+    const mins = computeElapsedMinutes();
+    setLearning((l) => ({ ...l, duration: mins }));
+
     setView("FINISHED");
     // ensure stopwatch is stopped and mark task completed (keep modal open so user can add learning)
     try {
@@ -26,6 +35,12 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
       /* noop */
     }
   }
+
+  const handleStop = () => {
+    const mins = computeElapsedMinutes();
+    setLearning((l) => ({ ...l, duration: mins }));
+    onFinish();
+  };
 
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
@@ -39,6 +54,7 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
       date: task?.completedAt
         ? task.completedAt.slice(0, 10)
         : new Date().toISOString().slice(0, 10),
+      duration: learning.duration ?? computeElapsedMinutes(),
     });
 
     reset();
@@ -56,6 +72,7 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
             isRunning={isRunning}
             start={start}
             pause={pause}
+            onStop={handleStop}
           />
         </>
       )}
@@ -98,7 +115,7 @@ export default function ProgressWatch({ task, onClose, onTaskComplete }) {
   );
 }
 
-function TimerUI({ minutes, seconds, isRunning, start, pause }) {
+function TimerUI({ minutes, seconds, isRunning, start, pause, onStop }) {
   return (
     <>
       <div className="text-4xl font-mono text-center mb-6">
@@ -110,12 +127,20 @@ function TimerUI({ minutes, seconds, isRunning, start, pause }) {
           Start
         </button>
       ) : (
-        <button
-          onClick={pause}
-          className="w-full bg-yellow-500 py-2 rounded-lg"
-        >
-          Pause
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={pause}
+            className="flex-1 bg-yellow-500 rounded-lg py-2"
+          >
+            Pause
+          </button>
+          <button
+            onClick={onStop}
+            className="flex-1 bg-red-500 rounded-lg py-2"
+          >
+            Stop
+          </button>
+        </div>
       )}
     </>
   );
