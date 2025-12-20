@@ -9,6 +9,7 @@ const initialTasks = [
     startDate: "2025-12-01",
     targetDate: "2025-12-30",
     priority: "High",
+    duration: 0.05, // minutes
     completed: false,
   },
   {
@@ -18,6 +19,7 @@ const initialTasks = [
     startDate: "2025-12-01",
     targetDate: "2025-12-30",
     priority: "Medium",
+    duration: 0.05, // minutes
     completed: false,
   },
   {
@@ -27,6 +29,7 @@ const initialTasks = [
     startDate: "2025-12-01",
     targetDate: "2025-12-30",
     priority: "Low",
+    duration: 0.05, // minutes
     completed: false,
   },
 ];
@@ -42,6 +45,7 @@ export function TasksProvider({ children }) {
       startDate: task.startDate || "",
       targetDate: task.targetDate || "",
       priority: task.priority || "Medium",
+      duration: Number(task.duration) || 25,
       completed: false,
     };
     setTasks((prev) => [newTask, ...prev]);

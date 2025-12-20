@@ -1,60 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useStopwatch } from "../hooks/useStopwatch";
 
-export default function ProgressWatch({ task, onClose }) {
+export default function ProgressWatch({ task, onClose, onTaskComplete }) {
   const [view, setView] = useState("RUNNING");
   const [learning, setLearning] = useState({
     today: "",
     tomorrow: "",
   });
 
-  const onFinish = () => {
+  const startingSeconds = (task?.duration ?? 25) * 60; // convert minutes -> seconds
+  const { time, isRunning, start, pause, reset } = useStopwatch(
+    startingSeconds,
+    onFinish
+  );
+
+  function onFinish() {
     setView("FINISHED");
-  };
-
-  const { time, isRunning, start, pause, reset } = useStopwatch(2, onFinish);
-
-  // start timer automatically when a task is selected, cleanup on unmount or deselect
-  useEffect(() => {
-    if (task) {
-      setView("RUNNING");
-      start();
-    }
-    return () => {
+    // ensure stopwatch is stopped and notify parent that task completed
+    try {
       pause();
-      reset();
-      setLearning({ today: "", tomorrow: "" });
-      setView("RUNNING");
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task]);
+    } catch {
+      /* noop */
+    }
+  }
+
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
 
   const handleSubmitLearning = () => {
     console.log("Learning:", learning);
-    setView("COMPLETED");
     reset();
+    setView("FINISHED");
   };
 
   return (
     <div className="bg-slate-800 text-white rounded-2xl p-6 w-full">
-      {/* Task header */}
-      {task && (
-        <div className="flex justify-between items-center mb-3">
-          <div className="font-semibold">{task.title}</div>
-          {onClose && (
-            <button
-              className="text-slate-300 hover:text-white"
-              onClick={onClose}
-              aria-label="Close timer"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      )}
-
       {/* ---------------- RUNNING ---------------- */}
       {view === "RUNNING" && (
         <>
@@ -81,7 +61,10 @@ export default function ProgressWatch({ task, onClose }) {
             </button>
             <button
               onClick={() => {
-                setView("COMPLETED");
+                if (typeof onTaskComplete === "function" && task) {
+                  onTaskComplete(task.id);
+                }
+                onClose && onClose();
               }}
               className="flex-1 bg-green-500 rounded-lg py-2"
             >
@@ -98,21 +81,6 @@ export default function ProgressWatch({ task, onClose }) {
           setLearning={setLearning}
           onSubmit={handleSubmitLearning}
         />
-      )}
-
-      {/* ---------------- COMPLETED ---------------- */}
-      {view === "COMPLETED" && (
-        <div>
-          <p className="text-center text-green-400 mb-4">✅ Task Completed</p>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="w-full bg-slate-600 py-2 rounded-lg"
-            >
-              Close
-            </button>
-          )}
-        </div>
       )}
     </div>
   );
@@ -144,11 +112,6 @@ function TimerUI({ minutes, seconds, isRunning, start, pause }) {
 function LearningForm({ learning, setLearning, onSubmit }) {
   return (
     <>
-      <div className="tabs tabs-box mb-4">
-        <span className="tab tab-active">Today</span>
-        <span className="tab">Tomorrow</span>
-      </div>
-
       <textarea
         placeholder="What did you learn today?"
         className="w-full mb-3 p-2 rounded bg-slate-700"

@@ -31,6 +31,11 @@ export function useStopwatch(startingTime, onFinish) {
     };
   }, [isRunning, onFinish]);
 
+  // If the provided startingTime changes (e.g. different task duration), update the internal time value
+  useEffect(() => {
+    setTime(startingTime);
+  }, [startingTime]);
+
   const start = () => {
     if (time > 0) setIsRunning(true);
   };

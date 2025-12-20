@@ -7,6 +7,7 @@ const TaskList = () => {
   const [form, setForm] = React.useState({
     name: "",
     description: "",
+    duration: 25,
     startDate: "",
     targetDate: "",
     priority: "Medium",
@@ -32,11 +33,13 @@ const TaskList = () => {
       startDate: form.startDate,
       targetDate: form.targetDate,
       priority: form.priority,
+      duration: Number(form.duration) || 25,
     });
     setOpenAddTask(false);
     setForm({
       name: "",
       description: "",
+      duration: 25,
       startDate: "",
       targetDate: "",
       priority: "Medium",
@@ -62,6 +65,7 @@ const TaskList = () => {
                 <th className="p-3">Title</th>
                 <th className="p-3">Start</th>
                 <th className="p-3">Target</th>
+                <th className="p-3">Duration</th>
                 <th className="p-3">Priority</th>
                 <th className="p-3">Completed</th>
               </tr>
@@ -69,7 +73,7 @@ const TaskList = () => {
             <tbody>
               {tasks.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center text-slate-400 py-6">
+                  <td colSpan={6} className="text-center text-slate-400 py-6">
                     No tasks available
                   </td>
                 </tr>
@@ -190,6 +194,21 @@ const TaskList = () => {
               </label>
             </div>
             <label className="flex flex-col mt-3">
+              {" "}
+              <span className="text-sm text-slate-300 mb-1">
+                Duration (minutes)
+              </span>
+              <input
+                name="duration"
+                value={form.duration}
+                onChange={handleChange}
+                type="number"
+                min={1}
+                className="p-2 rounded-lg bg-slate-700 border border-slate-600"
+              />
+            </label>
+            <label className="flex flex-col mt-3">
+              {" "}
               <span className="text-sm text-slate-300 mb-1">Priority</span>
               <select
                 name="priority"
