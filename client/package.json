@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/client": "^4.0.11",
     "@tailwindcss/vite": "^4.1.18",
+    "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "graphql": "^16.12.0",
     "react": "^19.2.0",

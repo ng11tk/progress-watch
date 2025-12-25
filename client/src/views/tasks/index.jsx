@@ -1,15 +1,16 @@
 import React from "react";
-import { useTasks } from "../../contexts/useTasks";
+import axios from "axios";
 
 const TaskList = () => {
-  const { tasks, addTask, updateTask } = useTasks();
   const [openAddTask, setOpenAddTask] = React.useState(false);
+  const [tasks, setTasks] = React.useState([]);
+
   const [form, setForm] = React.useState({
-    name: "",
-    description: "",
-    duration: 25,
-    startDate: "",
-    targetDate: "",
+    name: "Task Name",
+    description: "Task Description",
+    duration: 12,
+    startDate: "25/01/2024",
+    targetDate: "25/02/2026",
     priority: "Medium",
   });
 
@@ -21,20 +22,85 @@ const TaskList = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [openAddTask]);
 
+  // fetch tasks from backend on mount
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/tasks");
+      if (response.status === 200) {
+        const result = response.data.map((task) => ({
+          ...task,
+          startDate: new Date(task.start_date).toISOString().split("T")[0],
+          targetDate: new Date(task.end_date).toISOString().split("T")[0],
+        }));
+        setTasks(result);
+      } else {
+        console.error("Failed to fetch tasks:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // handlers
   const handleOverlayClick = () => setOpenAddTask(false);
   const handleModalClick = (e) => e.stopPropagation();
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  const handleSubmit = () => {
+
+  // create new task
+  const handleSubmit = async () => {
+    // list of checks
+    if (!form.name.trim()) {
+      alert("Task name is required");
+      return;
+    }
+    if (!form.startDate) {
+      alert("Start date is required");
+      return;
+    }
+    if (!form.targetDate) {
+      alert("Target date is required");
+      return;
+    }
+
+    // target date should be after start date
+    if (new Date(form.targetDate) < new Date(form.startDate)) {
+      alert("Target date should be after start date");
+      return;
+    }
+
     // add to shared tasks store
-    addTask({
+    console.log("Submitting form:", form);
+    const newTask = {
       title: form.name,
       description: form.description,
       startDate: form.startDate,
       targetDate: form.targetDate,
       priority: form.priority,
       duration: Number(form.duration) || 25,
-    });
+    };
+
+    // send task data to backend here
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/tasks",
+        newTask
+      );
+      if (response.status !== 201) {
+        console.error("Failed to add task to backend:", response);
+        return;
+      }
+      console.log("Task added to backend:", response.data);
+      // refresh task list
+      fetchTasks();
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+
     setOpenAddTask(false);
     setForm({
       name: "",
@@ -81,7 +147,7 @@ const TaskList = () => {
 
               {tasks.map((task) => (
                 <tr
-                  key={task.id}
+                  key={task._id}
                   className={`border-t border-slate-700 ${
                     task.completed ? "opacity-60" : ""
                   }`}
@@ -99,30 +165,15 @@ const TaskList = () => {
                     {task.targetDate}
                   </td>
                   <td className="p-3 align-top text-xs text-slate-300">
-                    {task.priority}
+                    {task.duration} mins
+                  </td>
+                  <td className="p-3 align-top text-xs text-slate-300">
+                    {task.priority.charAt(0).toUpperCase() +
+                      task.priority.slice(1)}
                   </td>
                   <td className="p-3 align-top text-xs">
                     <label className="inline-flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={!!task.completed}
-                        onChange={() =>
-                          updateTask(task.id, {
-                            completed: !task.completed,
-                            completedAt: !task.completed
-                              ? new Date().toISOString()
-                              : undefined,
-                          })
-                        }
-                        className="checkbox checkbox-sm"
-                      />
-                      {task.completed ? (
-                        <span className="text-green-400 font-medium">
-                          Completed
-                        </span>
-                      ) : (
-                        <span className="text-slate-300">Pending</span>
-                      )}
+                      <span className="text-slate-300">Pending</span>
                     </label>
                   </td>
                 </tr>
@@ -143,13 +194,6 @@ const TaskList = () => {
             role="dialog"
             aria-modal="true"
           >
-            <button
-              className="absolute top-3 right-3 text-slate-300 hover:text-white"
-              onClick={() => setOpenAddTask(false)}
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
             <h2 className="text-xl mb-4">Add New Task</h2>
             <label className="sr-only">Task Name</label>
             <input

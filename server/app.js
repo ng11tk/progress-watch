@@ -3,9 +3,12 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import bycrypt from "bcrypt";
+import cors from "cors";
 
 import connectDB from "./config/database.js";
 import User from "./models/user.js";
+import Task from "./models/task.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 const app = express();
@@ -14,6 +17,12 @@ const PORT = process.env.PORT || 3000;
 // Connect to Database
 connectDB();
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -116,7 +125,7 @@ app.post("/login", async (req, res) => {
 });
 
 // get user by email
-app.get("/user", async (req, res) => {
+app.post("/user", async (req, res) => {
   try {
     // check for cookie
     const token = req.cookies.token;
@@ -149,6 +158,53 @@ app.get("/user", async (req, res) => {
     }
 
     res.status(200).json(findUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// create new task
+app.post("/api/tasks", async (req, res) => {
+  try {
+    const { title, description, startDate, targetDate, priority, duration } =
+      req.body;
+
+    if (!title || !startDate || !targetDate) {
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
+    }
+
+    const newTask = new Task({
+      user_id: new mongoose.Types.ObjectId("694cac6efa646fd0125d815e"),
+      title,
+      description,
+      category: "General",
+      start_date: startDate,
+      end_date: targetDate,
+      duration: Number(duration) || 25,
+      priority: priority.toLowerCase(),
+    });
+
+    const savedTask = await newTask.save();
+
+    res.status(201).json({
+      message: "Task created successfully",
+      task: savedTask,
+    });
+  } catch (error) {
+    console.error("Create Task Error:", error);
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+// get all tasks
+app.get("/api/tasks", async (req, res) => {
+  try {
+    const tasks = await Task.find();
+    res.status(200).json(tasks);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
