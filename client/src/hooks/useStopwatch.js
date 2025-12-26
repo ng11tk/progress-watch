@@ -42,9 +42,9 @@ export function useStopwatch(startingTime, onFinish) {
 
   const pause = () => setIsRunning(false);
 
-  const reset = () => {
+  const reset = (newTime) => {
     setIsRunning(false);
-    setTime(startingTime);
+    setTime(newTime ?? startingTime);
   };
 
   return {

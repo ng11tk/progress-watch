@@ -9,6 +9,7 @@ import connectDB from "./config/database.js";
 import User from "./models/user.js";
 import Task from "./models/task.js";
 import mongoose from "mongoose";
+import Session from "./models/session.js";
 
 dotenv.config();
 const app = express();
@@ -163,6 +164,20 @@ app.post("/user", async (req, res) => {
   }
 });
 
+// delete the user
+app.delete("/user", async (req, res) => {
+  try {
+    const userEmail = req.body.email;
+    const deletedUser = await User.find.findOneAndDelete({ email: userEmail });
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // create new task
 app.post("/api/tasks", async (req, res) => {
   try {
@@ -202,23 +217,101 @@ app.post("/api/tasks", async (req, res) => {
 
 // get all tasks
 app.get("/api/tasks", async (req, res) => {
+  const today = new Date().toISOString().split("T")[0];
+
   try {
-    const tasks = await Task.find();
-    res.status(200).json(tasks);
+    // find the session for today and return tasks accordingly
+    const sessions = await Session.find({
+      session_date: new Date().toISOString().split("T")[0],
+    });
+    console.log("🚀 ~ sessions:", sessions);
+
+    const tasks = await Task.find({
+      start_date: { $lte: today },
+      end_date: { $gte: today },
+    });
+    const formattedTasks = tasks.map((task) => ({
+      id: task._id,
+      title: task.title,
+      description: task.description,
+      start_date: new Date(task.start_date).toISOString().split("T")[0],
+      end_date: new Date(task.end_date).toISOString().split("T")[0],
+      priority: task.priority,
+      duration: task.duration,
+    }));
+
+    // add new field named session_status to each task from sessions if session exists for the task
+    formattedTasks.forEach((task) => {
+      const session = sessions.find(
+        (s) => s.task_id.toString() === task.id.toString()
+      );
+      if (session) {
+        ["completed", "interrupted"].includes(session.status);
+        task.session_status = ["completed", "interrupted"].includes(
+          session.status
+        )
+          ? "completed"
+          : session.status;
+      } else {
+        task.session_status = "idle";
+      }
+    });
+
+    res.status(200).json(formattedTasks);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// delete the user
-app.delete("/user", async (req, res) => {
+// create new sessions
+app.post("/api/session", async (req, res) => {
+  const { task_id, session_date, session_time, status } = req.body;
+
+  if (!task_id || !session_date || !session_time || !status) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
   try {
-    const userEmail = req.body.email;
-    const deletedUser = await User.find.findOneAndDelete({ email: userEmail });
-    if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
+    const newSession = new Session({
+      task_id,
+      session_date,
+      session_time,
+      status,
+    });
+
+    // check if session is already present for the task_id and session_date and status is not completed
+    const existingSession = await Session.findOne({
+      task_id,
+      session_date,
+      status: { $ne: "completed" },
+    });
+    if (existingSession) {
+      // update the existing session
+      existingSession.session_time = session_time;
+      existingSession.status = status;
+      const updatedSession = await existingSession.save();
+      return res.status(200).json({
+        message: "Session updated successfully",
+        session: updatedSession,
+      });
     }
-    res.status(200).json({ message: "User deleted successfully" });
+
+    const savedSession = await newSession.save();
+
+    res
+      .status(201)
+      .json({ message: "Session created successfully", session: savedSession });
+  } catch (error) {
+    console.error("Create Session Error:", error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// get sessions by task_id
+app.get("/api/sessions", async (req, res) => {
+  const { task_id } = req.query;
+  try {
+    const sessions = await Session.find({ task_id });
+    res.status(200).json(sessions);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

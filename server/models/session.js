@@ -11,12 +11,7 @@ const sessionSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    duration_minutes: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    actual_minutes: {
+    session_time: {
       type: Number,
       required: true,
       min: 0,
@@ -25,14 +20,6 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       enum: ["completed", "interrupted", "paused"],
       default: "completed",
-    },
-    started_at: {
-      type: Date,
-      required: true,
-    },
-    completed_at: {
-      type: Date,
-      required: true,
     },
   },
   { timestamps: true }
