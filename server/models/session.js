@@ -18,8 +18,8 @@ const sessionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["completed", "interrupted", "paused"],
-      default: "completed",
+      enum: ["completed", "finished", "interrupted", "paused"],
+      default: "finished",
     },
   },
   { timestamps: true }

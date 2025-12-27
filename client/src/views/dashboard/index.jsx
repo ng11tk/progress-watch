@@ -94,9 +94,19 @@ const Dashboard = () => {
                           Paused
                         </span>
                       )}
+                      {task.session_status === "finished" && (
+                        <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium">
+                          Finished
+                        </span>
+                      )}
                       {task.session_status === "completed" && (
                         <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium">
                           Completed
+                        </span>
+                      )}
+                      {task.session_status === "interrupted" && (
+                        <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
+                          Interrupted
                         </span>
                       )}
                       {task.session_status === "idle" && (

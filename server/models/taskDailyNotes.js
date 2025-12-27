@@ -13,7 +13,7 @@ const taskDailyNotesSchema = new mongoose.Schema(
     },
     today_learnings: {
       type: String,
-      required: false,
+      required: true,
       default: "",
     },
     tomorrow_plans: {

@@ -10,6 +10,7 @@ import User from "./models/user.js";
 import Task from "./models/task.js";
 import mongoose from "mongoose";
 import Session from "./models/session.js";
+import TaskDailyNotes from "./models/taskDailyNotes.js";
 
 dotenv.config();
 const app = express();
@@ -28,14 +29,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
-
 // signup route
 app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
-  console.log("🚀 ~ name, email, password:", name, email, password);
 
   // validation
   if (!name || !email || !password) {
@@ -224,7 +220,6 @@ app.get("/api/tasks", async (req, res) => {
     const sessions = await Session.find({
       session_date: new Date().toISOString().split("T")[0],
     });
-    console.log("🚀 ~ sessions:", sessions);
 
     const tasks = await Task.find({
       start_date: { $lte: today },
@@ -245,16 +240,7 @@ app.get("/api/tasks", async (req, res) => {
       const session = sessions.find(
         (s) => s.task_id.toString() === task.id.toString()
       );
-      if (session) {
-        ["completed", "interrupted"].includes(session.status);
-        task.session_status = ["completed", "interrupted"].includes(
-          session.status
-        )
-          ? "completed"
-          : session.status;
-      } else {
-        task.session_status = "idle";
-      }
+      task.session_status = session?.status ? session.status : "idle";
     });
 
     res.status(200).json(formattedTasks);
@@ -266,6 +252,13 @@ app.get("/api/tasks", async (req, res) => {
 // create new sessions
 app.post("/api/session", async (req, res) => {
   const { task_id, session_date, session_time, status } = req.body;
+  console.log(
+    "🚀 ~ task_id, session_date, session_time, status:",
+    task_id,
+    session_date,
+    session_time,
+    status
+  );
 
   if (!task_id || !session_date || !session_time || !status) {
     return res.status(400).json({ message: "Missing required fields" });
@@ -313,6 +306,34 @@ app.get("/api/sessions", async (req, res) => {
     const sessions = await Session.find({ task_id });
     res.status(200).json(sessions);
   } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// insert daily notes for a task
+app.post("/api/daily-notes", async (req, res) => {
+  try {
+    const { task_id, note_date, today_learnings, tomorrow_plans, blockers } =
+      req.body;
+    if (!task_id || !note_date) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+    const newNotes = new TaskDailyNotes({
+      task_id,
+      note_date,
+      today_learnings,
+      tomorrow_plans,
+      blockers,
+    });
+
+    const savedNotes = await newNotes.save();
+
+    res.status(201).json({
+      message: "Daily notes created successfully",
+      notes: savedNotes,
+    });
+  } catch (error) {
+    console.error("Create Daily Notes Error:", error);
     res.status(400).json({ message: error.message });
   }
 });
