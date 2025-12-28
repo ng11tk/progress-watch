@@ -39,6 +39,7 @@ const StopwatchModal = ({ task, onClose }) => {
   console.log("🚀 ~ StopwatchModal ~ learning:", learning);
   const [sessionDetails, setSessionDetails] = useState(null);
   console.log("🚀 ~ StopwatchModal ~ sessionDetails:", sessionDetails);
+  // eslint-disable-next-line no-unused-vars
   const [timerStatus, setTimerStatus] = useState("idle");
   // idle, start, stop, pause, finish, completed
 
@@ -50,9 +51,12 @@ const StopwatchModal = ({ task, onClose }) => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/sessions", {
-          params: { task_id: task.id },
-        });
+        const response = await axios.get(
+          "http://localhost:3000/server/api/sessions",
+          {
+            params: { task_id: task.id },
+          }
+        );
         const session = response?.data[0];
 
         if (session) {
@@ -93,7 +97,7 @@ const StopwatchModal = ({ task, onClose }) => {
     pause();
 
     try {
-      await axios.post("http://localhost:3000/api/session", {
+      await axios.post("http://localhost:3000/server/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: Math.max(0, Math.ceil(computeElapsedSec())),
@@ -103,7 +107,7 @@ const StopwatchModal = ({ task, onClose }) => {
       console.error("failed to insert session", error);
     }
   };
-  const handleStop = () => {
+  const handleStop = async () => {
     const secs = computeElapsedSec();
     const mins = Math.max(0, Math.ceil(secs / 60));
     setLearning((l) => ({ ...l, duration: mins }));
@@ -114,7 +118,7 @@ const StopwatchModal = ({ task, onClose }) => {
 
     // send session update to server
     try {
-      axios.post("http://localhost:3000/api/session", {
+      await axios.post("http://localhost:3000/server/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: Math.max(0, Math.ceil(computeElapsedSec())),
@@ -124,7 +128,7 @@ const StopwatchModal = ({ task, onClose }) => {
       console.error("failed to insert session", error);
     }
   };
-  function onFinish() {
+  async function onFinish() {
     // set learning duration from elapsed time before changing view/state
     const secs = computeElapsedSec();
     const mins = Math.max(0, Math.ceil(secs / 60));
@@ -141,7 +145,7 @@ const StopwatchModal = ({ task, onClose }) => {
 
     // send session update to server - timer completed naturally
     try {
-      axios.post("http://localhost:3000/api/session", {
+      await axios.post("http://localhost:3000/server/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: secs,
@@ -151,9 +155,9 @@ const StopwatchModal = ({ task, onClose }) => {
       console.error("failed to insert session", error);
     }
   }
-  function handleComplete() {
+  async function handleComplete() {
     try {
-      axios.post("http://localhost:3000/api/session", {
+      await axios.post("http://localhost:3000/server/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: sessionDetails?.session_time,

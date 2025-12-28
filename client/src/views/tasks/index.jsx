@@ -25,7 +25,9 @@ const TaskList = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/tasks");
+      const response = await axios.get(
+        "http://localhost:3000/server/api/tasks"
+      );
       if (response.status === 200) {
         const result = response.data.map((task) => ({
           ...task,
@@ -87,7 +89,7 @@ const TaskList = () => {
     // send task data to backend here
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/tasks",
+        "http://localhost:3000/server/api/task",
         newTask
       );
       if (response.status !== 201) {

@@ -10,7 +10,7 @@ const Dashboard = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/tasks");
+      const response = await axios.get("http://localhost:3000/server/api/tasks");
       if (response.status === 200) {
         setTasks(response.data);
       } else {
