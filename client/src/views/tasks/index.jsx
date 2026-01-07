@@ -9,9 +9,9 @@ const TaskList = () => {
   const [form, setForm] = React.useState({
     name: "Task Name",
     description: "Task Description",
-    duration: 12,
-    startDate: "25/01/2024",
-    targetDate: "25/02/2026",
+    duration: 0.05,
+    startDate: new Date().toISOString().split("T")[0],
+    targetDate: new Date().toISOString().split("T")[0],
     priority: "Medium",
   });
 

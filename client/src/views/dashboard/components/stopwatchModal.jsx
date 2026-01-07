@@ -36,9 +36,7 @@ const StopwatchModal = ({ task, onClose }) => {
     today: "",
     tomorrow: "",
   });
-  console.log("🚀 ~ StopwatchModal ~ learning:", learning);
   const [sessionDetails, setSessionDetails] = useState(null);
-  console.log("🚀 ~ StopwatchModal ~ sessionDetails:", sessionDetails);
   // eslint-disable-next-line no-unused-vars
   const [timerStatus, setTimerStatus] = useState("idle");
   // idle, start, stop, pause, finish, completed
@@ -173,12 +171,15 @@ const StopwatchModal = ({ task, onClose }) => {
   const handleSubmitLearning = async () => {
     // add learning entry to server
     try {
-      const res = await axios.post("http://localhost:3000/api/daily-notes", {
-        task_id: task.id,
-        note_date: new Date().toISOString().slice(0, 10),
-        today_learnings: learning.today,
-        tomorrow_plans: learning.tomorrow,
-      });
+      const res = await axios.post(
+        "http://localhost:3000/server/api/daily-notes",
+        {
+          task_id: task.id,
+          note_date: new Date().toISOString().slice(0, 10),
+          today_learnings: learning.today,
+          tomorrow_plans: learning.tomorrow,
+        }
+      );
       if (res.status === 201) {
         // reset learning form and go back to finished view
         setLearning({
