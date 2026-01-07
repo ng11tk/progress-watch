@@ -7,7 +7,7 @@ import { TasksProvider } from "./contexts/TasksContext";
 
 export default function App() {
   return (
-    <div className="App bg-slate-900 min-h-screen text-white p-6">
+    <div className="App bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen text-white">
       <TasksProvider>
         <Router>
           <Routes>
