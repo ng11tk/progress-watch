@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useStopwatch } from "../../../hooks/useStopwatch";
+import { API_BASE_URL } from "../../../config";
 import LearningForm from "./learning";
 import Timer from "./timer";
 import { useEffect } from "react";
@@ -49,12 +50,9 @@ const StopwatchModal = ({ task, onClose }) => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/server/api/sessions",
-          {
-            params: { task_id: task.id },
-          }
-        );
+        const response = await axios.get(`${API_BASE_URL}/api/sessions`, {
+          params: { task_id: task.id },
+        });
         const session = response?.data[0];
 
         if (session) {
@@ -95,7 +93,7 @@ const StopwatchModal = ({ task, onClose }) => {
     pause();
 
     try {
-      await axios.post("http://localhost:3000/server/api/session", {
+      await axios.post(`${API_BASE_URL}/api/session`, {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: Math.max(0, Math.ceil(computeElapsedSec())),
@@ -116,7 +114,7 @@ const StopwatchModal = ({ task, onClose }) => {
 
     // send session update to server
     try {
-      await axios.post("http://localhost:3000/server/api/session", {
+      await axios.post(`${API_BASE_URL}/api/session`, {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: Math.max(0, Math.ceil(computeElapsedSec())),
@@ -143,7 +141,7 @@ const StopwatchModal = ({ task, onClose }) => {
 
     // send session update to server - timer completed naturally
     try {
-      await axios.post("http://localhost:3000/server/api/session", {
+      await axios.post(`${API_BASE_URL}/api/session`, {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: secs,
@@ -155,7 +153,7 @@ const StopwatchModal = ({ task, onClose }) => {
   }
   async function handleComplete() {
     try {
-      await axios.post("http://localhost:3000/server/api/session", {
+      await axios.post(`${API_BASE_URL}/api/session`, {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
         session_time: sessionDetails?.session_time,
@@ -171,15 +169,12 @@ const StopwatchModal = ({ task, onClose }) => {
   const handleSubmitLearning = async () => {
     // add learning entry to server
     try {
-      const res = await axios.post(
-        "http://localhost:3000/server/api/daily-notes",
-        {
-          task_id: task.id,
-          note_date: new Date().toISOString().slice(0, 10),
-          today_learnings: learning.today,
-          tomorrow_plans: learning.tomorrow,
-        }
-      );
+      const res = await axios.post(`${API_BASE_URL}/api/daily-notes`, {
+        task_id: task.id,
+        note_date: new Date().toISOString().slice(0, 10),
+        today_learnings: learning.today,
+        tomorrow_plans: learning.tomorrow,
+      });
       if (res.status === 201) {
         // reset learning form and go back to finished view
         setLearning({

@@ -26,8 +26,8 @@ services:
       dockerfile: Dockerfile.server
     container_name: progress-watch-server
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb+srv://ng11tk:TestMongo123@namastenode.qpvbswo.mongodb.net/progress-watch
@@ -39,22 +39,23 @@ services:
     networks:
       - progress-watch-network
 
-  # Frontend Client (React + Nginx)
+  # Frontend Client (React static files)
   client:
     build:
       context: .
       dockerfile: Dockerfile.client
     container_name: progress-watch-client
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "5173"
     depends_on:
       - server
     networks:
       - progress-watch-network
 
+  # Nginx Reverse Proxy
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: progress-watch-nginx
     ports:
       - "80:80"
@@ -67,8 +68,21 @@ services:
       - client
       - server
     networks:
-      - app-network
+      - progress-watch-network
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:80/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   certbot:
     image: certbot/certbot
@@ -81,7 +95,7 @@ services:
       do certbot renew --quiet;
       sleep 12h & wait $${!}; done;"
     networks:
-      - app-network
+      - progress-watch-network
     restart: unless-stopped
 
 volumes:
