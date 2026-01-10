@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./App.css";
+import "./app.css";
 import Dashboard from "./views/dashboard";
 import TaskList from "./views/tasks";
 import Summary from "./views/summary";

@@ -1,0 +1,71 @@
+# Development docker-compose configuration
+version: "3.8"
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: progress-watch-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongodb_data_dev:/data/db
+    networks:
+      - progress-watch-network-dev
+
+  # Backend Server (Node.js/Express) - Development with hot reload
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+      target: development
+    container_name: progress-watch-server-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb+srv://ng11tk:TestMongo123@namastenode.qpvbswo.mongodb.net/progress-watch
+      - JWT_SECRET=dev-secret-key-not-for-production
+      - PORT=3000
+      - CORS_ORIGIN=http://localhost:5173,http://localhost
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - progress-watch-network-dev
+    command: yarn dev
+
+  # Frontend Client (React) - Development with Vite hot reload
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+      target: development
+    container_name: progress-watch-client-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - progress-watch-network-dev
+    command: yarn dev --host
+
+volumes:
+  mongodb_data_dev:
+
+networks:
+  progress-watch-network-dev:
+    driver: bridge

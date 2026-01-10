@@ -1,0 +1,67 @@
+# Stage 1: Development
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY client/package.json client/yarn.lock* ./
+
+# Install dependencies
+RUN yarn install
+
+# Copy client source
+COPY client/ .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Development command (can be overridden)
+CMD ["yarn", "dev", "--host"]
+
+# Stage 2: Build the React client
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY client/package.json client/yarn.lock* ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy client source
+COPY client/ .
+
+# Build the application
+RUN yarn build
+
+# Stage 2: Serve with nginx
+FROM nginx:alpine AS production
+
+# Copy built files from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Create a non-root user
+RUN addgroup -g 1001 -S nginx-user && \
+    adduser -S nginx-user -u 1001 && \
+    chown -R nginx-user:nginx-user /usr/share/nginx/html && \
+    chown -R nginx-user:nginx-user /var/cache/nginx && \
+    chown -R nginx-user:nginx-user /var/log/nginx && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx-user:nginx-user /var/run/nginx.pid
+
+# Switch to non-root user
+USER nginx-user
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
