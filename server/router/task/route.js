@@ -5,6 +5,6 @@ const taskPublicRouter = Router();
 const taskPrivateRouter = Router();
 
 taskPrivateRouter.post("/task", createNewTask);
-taskPrivateRouter.get("/tasks", getAllTasks);
+taskPrivateRouter.post("/tasks", getAllTasks);
 
 export { taskPublicRouter, taskPrivateRouter };

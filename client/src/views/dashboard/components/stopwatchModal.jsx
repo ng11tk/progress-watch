@@ -190,80 +190,58 @@ const StopwatchModal = ({ task, onClose }) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div
-        className="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 w-[500px] relative shadow-2xl border border-slate-700/50 animate-in zoom-in duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          className="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700 transition-all"
-          onClick={onClose}
-        >
-          <span className="text-xl">✕</span>
-        </button>
+    <div className="bg-slate-700/30 rounded-2xl p-6 border border-slate-600/30">
+      {/* ---------------- RUNNING ---------------- */}
+      {view === "RUNNING" && (
+        <>
+          <Timer
+            minutes={minutes}
+            seconds={seconds}
+            isRunning={isRunning}
+            start={handleStart}
+            pause={handlePause}
+            onStop={handleStop}
+          />
+        </>
+      )}
 
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold mb-2">{task.title}</h3>
-          <p className="text-slate-300 leading-relaxed">{task.description}</p>
-        </div>
+      {/* ---------------- FINISHED ---------------- */}
+      {view === "FINISHED" && (
+        <>
+          <div className="text-center mb-6">
+            <div className="text-5xl mb-3">✅</div>
+            <p className="text-green-400 text-lg font-semibold">
+              Timer Completed
+            </p>
+            <p className="text-slate-400 text-sm mt-1">
+              Great work! Add your learnings or mark as complete.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setView("ADD_LEARNING")}
+              className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl py-3 font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200"
+            >
+              💡 Add Learning
+            </button>
+            <button
+              onClick={handleComplete}
+              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl py-3 font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all duration-200"
+            >
+              ✓ Complete
+            </button>
+          </div>
+        </>
+      )}
 
-        <div className="bg-slate-700/30 rounded-2xl p-6 border border-slate-600/30">
-          {/* ---------------- RUNNING ---------------- */}
-          {view === "RUNNING" && (
-            <>
-              <Timer
-                minutes={minutes}
-                seconds={seconds}
-                isRunning={isRunning}
-                start={handleStart}
-                pause={handlePause}
-                onStop={handleStop}
-              />
-            </>
-          )}
-
-          {/* ---------------- FINISHED ---------------- */}
-          {view === "FINISHED" && (
-            <>
-              <div className="text-center mb-6">
-                <div className="text-5xl mb-3">✅</div>
-                <p className="text-green-400 text-lg font-semibold">
-                  Timer Completed
-                </p>
-                <p className="text-slate-400 text-sm mt-1">
-                  Great work! Add your learnings or mark as complete.
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setView("ADD_LEARNING")}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl py-3 font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200"
-                >
-                  💡 Add Learning
-                </button>
-                <button
-                  onClick={handleComplete}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl py-3 font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all duration-200"
-                >
-                  ✓ Complete
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* ---------------- ADD LEARNING ---------------- */}
-          {view === "ADD_LEARNING" && (
-            <LearningForm
-              learning={learning}
-              setLearning={setLearning}
-              onSubmit={handleSubmitLearning}
-            />
-          )}
-        </div>
-      </div>
+      {/* ---------------- ADD LEARNING ---------------- */}
+      {view === "ADD_LEARNING" && (
+        <LearningForm
+          learning={learning}
+          setLearning={setLearning}
+          onSubmit={handleSubmitLearning}
+        />
+      )}
     </div>
   );
 };

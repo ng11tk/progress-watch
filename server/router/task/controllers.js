@@ -41,18 +41,14 @@ const createNewTask = async (req, res) => {
 
 // get all tasks
 const getAllTasks = async (req, res) => {
-  const today = new Date().toISOString().split("T")[0];
-
+  const { where } = req?.body ?? {};
   try {
     // find the session for today and return tasks accordingly
     const sessions = await Session.find({
       session_date: new Date().toISOString().split("T")[0],
     });
 
-    const tasks = await Task.find({
-      start_date: { $lte: today },
-      end_date: { $gte: today },
-    });
+    const tasks = await Task.find(where || {}).sort({ createdAt: -1 });
     const formattedTasks = tasks.map((task) => ({
       id: task._id,
       title: task.title,

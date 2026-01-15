@@ -4,10 +4,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../../config";
 
 const TaskList = () => {
-  const [openAddTask, setOpenAddTask] = React.useState(false);
-  const [tasks, setTasks] = React.useState([]);
-
-  const [form, setForm] = React.useState({
+  const inititalFormState = () => ({
     name: "Task Name",
     description: "Task Description",
     duration: 0.05,
@@ -15,6 +12,10 @@ const TaskList = () => {
     targetDate: new Date().toISOString().split("T")[0],
     priority: "Medium",
   });
+  const [openAddTask, setOpenAddTask] = React.useState(false);
+  const [tasks, setTasks] = React.useState([]);
+
+  const [form, setForm] = React.useState(inititalFormState());
 
   React.useEffect(() => {
     const onKey = (e) => {
@@ -27,7 +28,7 @@ const TaskList = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/tasks`);
+      const response = await axios.post(`${API_BASE_URL}/api/tasks`);
       if (response.status === 200) {
         const result = response.data.map((task) => ({
           ...task,
@@ -101,14 +102,7 @@ const TaskList = () => {
     }
 
     setOpenAddTask(false);
-    setForm({
-      name: "",
-      description: "",
-      duration: 25,
-      startDate: "",
-      targetDate: "",
-      priority: "Medium",
-    });
+    setForm(inititalFormState());
   };
 
   return (
@@ -163,9 +157,9 @@ const TaskList = () => {
                 </tr>
               )}
 
-              {tasks.map((task) => (
+              {tasks?.map((task) => (
                 <tr
-                  key={task._id}
+                  key={task.id}
                   className={`border-t border-slate-700/50 hover:bg-slate-700/30 transition-colors ${
                     task.completed ? "opacity-60" : ""
                   }`}

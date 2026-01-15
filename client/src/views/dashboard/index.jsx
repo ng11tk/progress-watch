@@ -11,7 +11,13 @@ const Dashboard = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/tasks`);
+      const response = await axios.post(`${API_BASE_URL}/api/tasks`, {
+        where: {
+          // task for today
+          start_date: { $lte: new Date().toISOString().split("T")[0] },
+          end_date: { $gte: new Date().toISOString().split("T")[0] },
+        },
+      });
       if (response.status === 200) {
         setTasks(response.data);
       } else {
@@ -157,10 +163,7 @@ const Dashboard = () => {
 
       {/* Timer Modal */}
       {Object.keys(selectedTask).length > 0 && (
-        <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
-          onClick={() => setSelectedTask({})}
-        >
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
           <div
             className="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 w-[480px] relative shadow-2xl border border-slate-700/50 animate-in zoom-in duration-200"
             onClick={(e) => e.stopPropagation()}
