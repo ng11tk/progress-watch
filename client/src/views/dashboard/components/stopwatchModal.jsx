@@ -152,11 +152,13 @@ const StopwatchModal = ({ task, onClose }) => {
     }
   }
   async function handleComplete() {
+    const secs = computeElapsedSec();
+    // send session update to server - mark session as completed
     try {
       await axios.post(`${API_BASE_URL}/api/session`, {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
-        session_time: sessionDetails?.session_time,
+        session_time: sessionDetails?.session_time || secs,
         status: "completed",
       });
     } catch (error) {

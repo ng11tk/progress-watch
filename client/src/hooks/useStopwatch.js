@@ -10,7 +10,7 @@ export function useStopwatch(startingTime, onFinish) {
 
     intervalRef.current = setInterval(() => {
       setTime((prev) => {
-        if (prev <= 1) {
+        if (prev < 1) {
           // ⛔ stop at 0
           clearInterval(intervalRef.current);
           intervalRef.current = null;
