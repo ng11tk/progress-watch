@@ -29,8 +29,15 @@ api.interceptors.response.use(
   (error) => {
     // Handle common errors
     if (error.response?.status === 401) {
-      // Redirect to login on unauthorized
-      window.location.href = "/login";
+      // Avoid redirect loop if already on auth pages
+      const currentPath = window.location.pathname;
+      if (currentPath !== "/login" && currentPath !== "/signup") {
+        // Clear any stored auth data
+        localStorage.removeItem("token");
+        sessionStorage.clear();
+        // Redirect to login on unauthorized
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

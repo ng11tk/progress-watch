@@ -1,9 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../lib/axios";
 import StopwatchModal from "./components/stopwatchModal";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const [selectedTask, setSelectedTask] = React.useState({});
   const [tasks, setTasks] = React.useState([]);
 
@@ -31,6 +34,11 @@ const Dashboard = () => {
     fetchTasks();
   }, []);
 
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
       {/* Header */}
@@ -40,7 +48,7 @@ const Dashboard = () => {
             Dashboard
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Track your daily progress
+            Welcome back, {user?.name || "User"}
           </p>
         </div>
 
@@ -58,6 +66,13 @@ const Dashboard = () => {
           >
             📊 Summary
           </Link>
+
+          <button
+            onClick={handleLogout}
+            className="text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 text-red-400 hover:text-red-300 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium"
+          >
+            🚪 Logout
+          </button>
         </div>
       </div>
 
