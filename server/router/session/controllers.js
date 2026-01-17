@@ -2,19 +2,13 @@ import Session from "../../models/session.js";
 
 const createNewSession = async (req, res) => {
   const { task_id, session_date, session_time, status } = req.body;
-  console.log(
-    "🚀 ~ task_id, session_date, session_time, status:",
-    task_id,
-    session_date,
-    session_time,
-    status
-  );
 
   if (!task_id || !session_date || !session_time || !status) {
     return res.status(400).json({ message: "Missing required fields" });
   }
   try {
     const newSession = new Session({
+      user_id: req.userId,
       task_id,
       session_date,
       session_time,
@@ -23,6 +17,7 @@ const createNewSession = async (req, res) => {
 
     // check if session is already present for the task_id and session_date and status is not completed
     const existingSession = await Session.findOne({
+      user_id: req.userId,
       task_id,
       session_date,
       status: { $ne: "completed" },
@@ -53,7 +48,7 @@ const createNewSession = async (req, res) => {
 const getSessionsByTaskId = async (req, res) => {
   const { task_id } = req.query;
   try {
-    const sessions = await Session.find({ task_id });
+    const sessions = await Session.find({ task_id, user_id: req.userId });
     res.status(200).json(sessions);
   } catch (error) {
     res.status(400).json({ message: error.message });

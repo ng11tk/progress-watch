@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const sessionSchema = new mongoose.Schema(
   {
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     task_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Task",
@@ -24,6 +29,11 @@ const sessionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for query optimization
+sessionSchema.index({ user_id: 1, session_date: 1 });
+sessionSchema.index({ task_id: 1, session_date: 1 });
+
 const Session = mongoose.model("Session", sessionSchema);
 
 export default Session;

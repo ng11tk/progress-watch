@@ -44,7 +44,7 @@ export default function SignupForm({ onSignupSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/signup`, {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

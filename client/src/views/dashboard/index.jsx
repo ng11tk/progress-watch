@@ -11,13 +11,19 @@ const Dashboard = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/tasks`, {
-        where: {
-          // task for today
-          start_date: { $lte: new Date().toISOString().split("T")[0] },
-          end_date: { $gte: new Date().toISOString().split("T")[0] },
+      const response = await axios.post(
+        `${API_BASE_URL}/api/tasks`,
+        {
+          where: {
+            // task for today
+            start_date: { $lte: new Date().toISOString().split("T")[0] },
+            end_date: { $gte: new Date().toISOString().split("T")[0] },
+          },
         },
-      });
+        {
+          withCredentials: true,
+        }
+      );
       if (response.status === 200) {
         setTasks(response.data);
       } else {

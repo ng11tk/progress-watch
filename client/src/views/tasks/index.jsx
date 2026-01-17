@@ -28,7 +28,13 @@ const TaskList = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/tasks`);
+      const response = await axios.post(
+        `${API_BASE_URL}/api/tasks`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
       if (response.status === 200) {
         const result = response.data.map((task) => ({
           ...task,
@@ -89,7 +95,9 @@ const TaskList = () => {
 
     // send task data to backend here
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/task`, newTask);
+      const response = await axios.post(`${API_BASE_URL}/api/task`, newTask, {
+        withCredentials: true,
+      });
       if (response.status !== 201) {
         console.error("Failed to add task to backend:", response);
         return;

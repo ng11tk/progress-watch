@@ -52,6 +52,7 @@ const StopwatchModal = ({ task, onClose }) => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/sessions`, {
           params: { task_id: task.id },
+          withCredentials: true,
         });
         const session = response?.data[0];
 
@@ -93,12 +94,18 @@ const StopwatchModal = ({ task, onClose }) => {
     pause();
 
     try {
-      await axios.post(`${API_BASE_URL}/api/session`, {
-        task_id: task.id,
-        session_date: new Date().toISOString().slice(0, 10),
-        session_time: Math.max(0, Math.ceil(computeElapsedSec())),
-        status: "paused",
-      });
+      await axios.post(
+        `${API_BASE_URL}/api/session`,
+        {
+          task_id: task.id,
+          session_date: new Date().toISOString().slice(0, 10),
+          session_time: Math.max(0, Math.ceil(computeElapsedSec())),
+          status: "paused",
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } catch (error) {
       console.error("failed to insert session", error);
     }
@@ -114,12 +121,18 @@ const StopwatchModal = ({ task, onClose }) => {
 
     // send session update to server
     try {
-      await axios.post(`${API_BASE_URL}/api/session`, {
-        task_id: task.id,
-        session_date: new Date().toISOString().slice(0, 10),
-        session_time: Math.max(0, Math.ceil(computeElapsedSec())),
-        status: "interrupted",
-      });
+      await axios.post(
+        `${API_BASE_URL}/api/session`,
+        {
+          task_id: task.id,
+          session_date: new Date().toISOString().slice(0, 10),
+          session_time: Math.max(0, Math.ceil(computeElapsedSec())),
+          status: "interrupted",
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } catch (error) {
       console.error("failed to insert session", error);
     }
@@ -141,12 +154,18 @@ const StopwatchModal = ({ task, onClose }) => {
 
     // send session update to server - timer completed naturally
     try {
-      await axios.post(`${API_BASE_URL}/api/session`, {
-        task_id: task.id,
-        session_date: new Date().toISOString().slice(0, 10),
-        session_time: secs,
-        status: "finished",
-      });
+      await axios.post(
+        `${API_BASE_URL}/api/session`,
+        {
+          task_id: task.id,
+          session_date: new Date().toISOString().slice(0, 10),
+          session_time: secs,
+          status: "finished",
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } catch (error) {
       console.error("failed to insert session", error);
     }
@@ -155,12 +174,18 @@ const StopwatchModal = ({ task, onClose }) => {
     const secs = computeElapsedSec();
     // send session update to server - mark session as completed
     try {
-      await axios.post(`${API_BASE_URL}/api/session`, {
-        task_id: task.id,
-        session_date: new Date().toISOString().slice(0, 10),
-        session_time: sessionDetails?.session_time || secs,
-        status: "completed",
-      });
+      await axios.post(
+        `${API_BASE_URL}/api/session`,
+        {
+          task_id: task.id,
+          session_date: new Date().toISOString().slice(0, 10),
+          session_time: sessionDetails?.session_time || secs,
+          status: "completed",
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } catch (error) {
       console.error("failed to insert session", error);
     }
@@ -171,12 +196,18 @@ const StopwatchModal = ({ task, onClose }) => {
   const handleSubmitLearning = async () => {
     // add learning entry to server
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/daily-notes`, {
-        task_id: task.id,
-        note_date: new Date().toISOString().slice(0, 10),
-        today_learnings: learning.today,
-        tomorrow_plans: learning.tomorrow,
-      });
+      const res = await axios.post(
+        `${API_BASE_URL}/api/daily-notes`,
+        {
+          task_id: task.id,
+          note_date: new Date().toISOString().slice(0, 10),
+          today_learnings: learning.today,
+          tomorrow_plans: learning.tomorrow,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       if (res.status === 201) {
         // reset learning form and go back to finished view
         setLearning({

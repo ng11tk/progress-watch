@@ -15,7 +15,7 @@ const createNewTask = async (req, res) => {
     }
 
     const newTask = new Task({
-      user_id: new mongoose.Types.ObjectId("694cac6efa646fd0125d815e"),
+      user_id: req.userId,
       title,
       description,
       category: "General",
@@ -48,7 +48,9 @@ const getAllTasks = async (req, res) => {
       session_date: new Date().toISOString().split("T")[0],
     });
 
-    const tasks = await Task.find(where || {}).sort({ createdAt: -1 });
+    const tasks = await Task.find({ ...where, user_id: req.userId }).sort({
+      createdAt: -1,
+    });
     const formattedTasks = tasks.map((task) => ({
       id: task._id,
       title: task.title,

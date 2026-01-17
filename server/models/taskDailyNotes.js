@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const taskDailyNotesSchema = new mongoose.Schema(
   {
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     task_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Task",
@@ -29,6 +34,10 @@ const taskDailyNotesSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for query optimization
+taskDailyNotesSchema.index({ user_id: 1, note_date: 1 });
+taskDailyNotesSchema.index({ task_id: 1, note_date: 1 });
 
 const TaskDailyNotes = mongoose.model("TaskDailyNotes", taskDailyNotesSchema);
 

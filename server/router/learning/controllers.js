@@ -8,6 +8,7 @@ const createDailyNotes = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
     const newNotes = new TaskDailyNotes({
+      user_id: req.userId,
       task_id,
       note_date,
       today_learnings,

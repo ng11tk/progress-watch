@@ -1,23 +1,6 @@
 const userByEmail = async (req, res) => {
   try {
-    // check for cookie
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    // check token validation
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // check valid user in db
-    const userEmail = decoded.email;
-    const user = await User.findOne({ email: userEmail });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // after all checks, proceed to
-    // give requested data
+    // User is already authenticated by middleware
     const userEmailQuery = req.body.email;
 
     // validate email format
