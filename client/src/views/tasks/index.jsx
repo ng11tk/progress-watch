@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { API_BASE_URL } from "../../config";
+import api from "../../lib/axios";
 
 const TaskList = () => {
   const inititalFormState = () => ({
@@ -28,13 +27,7 @@ const TaskList = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/tasks`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await api.post("/api/tasks", {});
       if (response.status === 200) {
         const result = response.data.map((task) => ({
           ...task,
@@ -95,9 +88,7 @@ const TaskList = () => {
 
     // send task data to backend here
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/task`, newTask, {
-        withCredentials: true,
-      });
+      const response = await api.post("/api/task", newTask);
       if (response.status !== 201) {
         console.error("Failed to add task to backend:", response);
         return;

@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { API_BASE_URL } from "../../config";
+import api from "../../lib/axios";
 import StopwatchModal from "./components/stopwatchModal";
 
 const Dashboard = () => {
@@ -11,19 +10,13 @@ const Dashboard = () => {
   // fetch tasks from backend on mount
   const fetchTasks = async () => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/tasks`,
-        {
-          where: {
-            // task for today
-            start_date: { $lte: new Date().toISOString().split("T")[0] },
-            end_date: { $gte: new Date().toISOString().split("T")[0] },
-          },
+      const response = await api.post("/api/tasks", {
+        where: {
+          // task for today
+          start_date: { $lte: new Date().toISOString().split("T")[0] },
+          end_date: { $gte: new Date().toISOString().split("T")[0] },
         },
-        {
-          withCredentials: true,
-        }
-      );
+      });
       if (response.status === 200) {
         setTasks(response.data);
       } else {
