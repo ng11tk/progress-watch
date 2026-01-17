@@ -85,7 +85,7 @@ const login = async (req, res) => {
       sameSite: "Strict",
     });
 
-    res.send("Login endpoint");
+    res.status(200).json({ message: "Login successful" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

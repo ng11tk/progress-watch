@@ -13,8 +13,13 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 
 // CORS configuration - support both development and production origins
+const corsOptions = {
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
