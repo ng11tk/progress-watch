@@ -49,7 +49,7 @@ const StopwatchModal = ({ task, onClose }) => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await api.get("/api/sessions", {
+        const response = await api.get("/api/sessions/task", {
           params: { task_id: task.id },
         });
         const session = response?.data[0];

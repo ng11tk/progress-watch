@@ -55,4 +55,17 @@ const getSessionsByTaskId = async (req, res) => {
   }
 };
 
-export { createNewSession, getSessionsByTaskId };
+// get all sessions for user
+const getAllSessions = async (req, res) => {
+  try {
+    const sessions = await Session.find({ user_id: req.userId }).sort({
+      session_date: -1,
+    });
+    res.status(200).json(sessions);
+  } catch (error) {
+    console.error("Get All Sessions Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { createNewSession, getSessionsByTaskId, getAllSessions };

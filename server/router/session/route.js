@@ -1,10 +1,15 @@
 import { Router } from "express";
-import { createNewSession, getSessionsByTaskId } from "./controllers.js";
+import {
+  createNewSession,
+  getSessionsByTaskId,
+  getAllSessions,
+} from "./controllers.js";
 
 const sessionPublicRouter = Router();
 const sessionPrivateRouter = Router();
 
 sessionPrivateRouter.post("/session", createNewSession);
-sessionPrivateRouter.get("/sessions", getSessionsByTaskId);
+sessionPrivateRouter.get("/sessions", getAllSessions);
+sessionPrivateRouter.get("/sessions/task", getSessionsByTaskId);
 
 export { sessionPublicRouter, sessionPrivateRouter };

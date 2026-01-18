@@ -39,12 +39,18 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  const handleCloseModal = () => {
+    setSelectedTask({});
+    // refresh tasks to reflect any changes
+    fetchTasks();
+  };
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Dashboard
           </h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -55,7 +61,7 @@ const Dashboard = () => {
         <div className="flex gap-3">
           <Link
             to="/tasks"
-            className="text-sm bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-5 py-2.5 rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 font-medium"
+            className="text-sm bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-5 py-2.5 rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 font-medium"
           >
             📋 Tasks
           </Link>
@@ -77,9 +83,9 @@ const Dashboard = () => {
       </div>
 
       {/* Today's Tasks */}
-      <section className="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 w-full shadow-2xl border border-slate-700/50">
+      <section className="bg-linear-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 w-full shadow-2xl border border-slate-700/50">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+          <div className="w-1 h-8 bg-linear-to-b from-blue-500 to-purple-500 rounded-full"></div>
           <h2 className="text-2xl font-bold">Today's Tasks</h2>
           <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium">
             {tasks.length}
@@ -107,7 +113,7 @@ const Dashboard = () => {
                 className={`p-5 rounded-xl transition-all duration-300 transform ${
                   task.session_status === "completed"
                     ? "bg-slate-700/30 opacity-60 cursor-default border border-slate-600/30"
-                    : "bg-gradient-to-r from-slate-700 to-slate-800 cursor-pointer hover:from-slate-600 hover:to-slate-700 hover:scale-[1.02] hover:shadow-xl border border-slate-600/50"
+                    : "bg-linear-to-r from-slate-700 to-slate-800 cursor-pointer hover:from-slate-600 hover:to-slate-700 hover:scale-[1.02] hover:shadow-xl border border-slate-600/50"
                 }`}
                 onClick={() => {
                   if (task.session_status !== "completed")
@@ -179,12 +185,12 @@ const Dashboard = () => {
       {Object.keys(selectedTask).length > 0 && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
           <div
-            className="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 w-[480px] relative shadow-2xl border border-slate-700/50 animate-in zoom-in duration-200"
+            className="bg-linear-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 w-120 relative shadow-2xl border border-slate-700/50 animate-in zoom-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               className="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700 transition-all"
-              onClick={() => setSelectedTask({})}
+              onClick={handleCloseModal}
             >
               <span className="text-xl">✕</span>
             </button>
@@ -196,10 +202,7 @@ const Dashboard = () => {
               </p>
             </div>
 
-            <StopwatchModal
-              task={selectedTask}
-              onClose={() => setSelectedTask({})}
-            />
+            <StopwatchModal task={selectedTask} onClose={handleCloseModal} />
           </div>
         </div>
       )}

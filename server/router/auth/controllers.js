@@ -81,7 +81,7 @@ const login = async (req, res) => {
 
     const cookieOptions = {
       httpOnly: true,
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 2 * 24 * 60 * 60 * 1000, // 48 hours
       path: "/",
       sameSite: "None",
       secure: true,
