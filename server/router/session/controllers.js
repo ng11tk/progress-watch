@@ -68,4 +68,32 @@ const getAllSessions = async (req, res) => {
   }
 };
 
-export { createNewSession, getSessionsByTaskId, getAllSessions };
+// update session
+const updateSession = async (req, res) => {
+  const { task_id, session_date, status } = req.body;
+
+  if (!task_id || !session_date || !status) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+  try {
+    const session = await Session.findOne({
+      user_id: req.userId,
+      task_id,
+      session_date,
+    });
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+    session.status = status;
+    const updatedSession = await session.save();
+    res.status(200).json({
+      message: "Session updated successfully",
+      session: updatedSession,
+    });
+  } catch (error) {
+    console.error("Update Session Error:", error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export { createNewSession, getSessionsByTaskId, getAllSessions, updateSession };

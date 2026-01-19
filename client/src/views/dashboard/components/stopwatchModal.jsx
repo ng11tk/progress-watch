@@ -6,41 +6,16 @@ import Timer from "./timer";
 import { useEffect } from "react";
 
 const StopwatchModal = ({ task, onClose }) => {
-  //* on pause
-  // if session is not created, create session with paused status, complteted_at as null
-  // if session exists(status != "completed" && task_id and session_date), update session with paused status, complteted_at as null
-  // if we again select the paused task to start, continue from where we left
-
-  //* on stop
-  // if session is not created, create session with interrupted status
-  // if session exists, update session with interrupted status
-
-  //* on finish
-  // if session is not created, create session with finish status
-  // if session exists, update session with finish status
-  // we can reopen the modal to add learning or complete the task
-
-  //* onComplete
-  // if session exists, update session with completed status
-
-  //todo on add learning
-  // if session exists, create new learning entry
-
-  const startingSeconds = (task?.duration ?? 25) * 60; // convert minutes -> seconds
+  const taskDurationInSeconds = task?.duration * 60;
   const { time, isRunning, start, pause, reset } = useStopwatch(
-    startingSeconds,
-    onFinish
+    taskDurationInSeconds,
+    onFinish,
   );
   const [view, setView] = useState("RUNNING");
   const [learning, setLearning] = useState({
     today: "",
     tomorrow: "",
   });
-  const [sessionDetails, setSessionDetails] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const [timerStatus, setTimerStatus] = useState("idle");
-  // idle, start, stop, pause, finish, completed
-
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
 
@@ -57,19 +32,15 @@ const StopwatchModal = ({ task, onClose }) => {
         if (session) {
           if (session.status === "paused") {
             const elapsedSeconds = session.session_time;
-            const remainingSeconds = startingSeconds - elapsedSeconds;
+            const remainingSeconds = taskDurationInSeconds - elapsedSeconds;
             reset(remainingSeconds);
-            setTimerStatus("pause");
           }
           // if status is finished or interrupted, we don't need to do anything special
           else if (session.status === "finished") {
             setView("FINISHED");
-            setTimerStatus("finish");
           } else if (session.status === "interrupted") {
             setView("FINISHED");
-            setTimerStatus("stop");
           }
-          setSessionDetails(session);
         }
       } catch (error) {
         console.error("failed to fetch session", error);
@@ -81,85 +52,88 @@ const StopwatchModal = ({ task, onClose }) => {
 
   // handlers
   function computeElapsedSec() {
-    return Math.max(0, Math.ceil(startingSeconds - time));
+    return Math.max(0, Math.ceil(taskDurationInSeconds - time));
   }
   const handleStart = () => {
-    setTimerStatus("start");
     start();
   };
   const handlePause = async () => {
-    setTimerStatus("pause");
     pause();
-
+    const sessionTime = computeElapsedSec();
+    // send session update to server
     try {
-      await api.post("/api/session", {
+      const response = await api.post("/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
-        session_time: Math.max(0, Math.ceil(computeElapsedSec())),
+        session_time: sessionTime,
         status: "paused",
       });
+
+      if (response.status === 201) {
+        alert("Session paused and saved!");
+      }
     } catch (error) {
       console.error("failed to insert session", error);
     }
   };
   const handleStop = async () => {
-    const secs = computeElapsedSec();
-    const mins = Math.max(0, Math.ceil(secs / 60));
-    setLearning((l) => ({ ...l, duration: mins }));
+    const sessionTime = computeElapsedSec();
+    const learningMinutes = Math.max(0, Math.ceil(sessionTime / 60));
+    setLearning((l) => ({ ...l, duration: learningMinutes }));
 
     setView("FINISHED");
-    setTimerStatus("stop"); // Keep as "stop" for interrupted sessions
     pause();
 
     // send session update to server
     try {
-      await api.post("/api/session", {
+      const response = await api.post("/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
-        session_time: Math.max(0, Math.ceil(computeElapsedSec())),
+        session_time: sessionTime,
         status: "interrupted",
       });
+      if (response.status === 200 || response.status === 201) {
+        alert("Session stopped and saved!");
+      }
     } catch (error) {
       console.error("failed to insert session", error);
     }
   };
   async function onFinish() {
     // set learning duration from elapsed time before changing view/state
-    const secs = computeElapsedSec();
-    const mins = Math.max(0, Math.ceil(secs / 60));
-    setLearning((l) => ({ ...l, duration: mins }));
+    const sessionTime = computeElapsedSec();
+    const learningMinutes = Math.max(0, Math.ceil(sessionTime / 60));
 
+    setLearning((l) => ({ ...l, duration: learningMinutes }));
     setView("FINISHED");
-    setTimerStatus("finish");
-    // ensure stopwatch is stopped and mark task completed (keep modal open so user can add learning)
-    try {
-      pause();
-    } catch {
-      /* noop */
-    }
+    pause();
 
     // send session update to server - timer completed naturally
     try {
-      await api.post("/api/session", {
+      const response = await api.post("/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
-        session_time: secs,
+        session_time: sessionTime,
         status: "finished",
       });
+      if (response.status === 200 || response.status === 201) {
+        alert("Session finished and saved!");
+      }
     } catch (error) {
       console.error("failed to insert session", error);
     }
   }
   async function handleComplete() {
-    const secs = computeElapsedSec();
     // send session update to server - mark session as completed
     try {
-      await api.post("/api/session", {
+      const response = await api.patch("/api/session", {
         task_id: task.id,
         session_date: new Date().toISOString().slice(0, 10),
-        session_time: sessionDetails?.session_time || secs,
         status: "completed",
       });
+      if (response.status === 200) {
+        alert("Session marked as completed!");
+      }
     } catch (error) {
       console.error("failed to insert session", error);
     }
