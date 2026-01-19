@@ -109,16 +109,16 @@ export default function Summary() {
           console.log("🚀 ~ Summary ~ date:", date);
           // Get sessions completed on this date
           const daySessions = completedSessions.filter(
-            (s) => s.session_date === date
+            (s) => s.session_date === date,
           );
           // Convert ObjectIds to strings for comparison
           const taskIdsCompleted = new Set(
-            daySessions.map((s) => String(s.task_id))
+            daySessions.map((s) => String(s.task_id)),
           );
 
           // Get tasks that were completed on this date
           const completedTasks = tasks.filter((t) =>
-            taskIdsCompleted.has(String(t._id))
+            taskIdsCompleted.has(String(t.id)),
           );
 
           const dayLearnings = learnings.filter((l) => l.note_date === date);
@@ -126,7 +126,7 @@ export default function Summary() {
           // Calculate total time from sessions
           const totalMinutes = daySessions.reduce(
             (sum, s) => sum + Math.ceil((s.session_time || 0) / 60),
-            0
+            0,
           );
 
           // format the date
@@ -168,7 +168,7 @@ export default function Summary() {
                     <ul className="space-y-3">
                       {completedTasks.map((t) => {
                         const taskSession = daySessions.find(
-                          (s) => String(s.task_id) === String(t._id)
+                          (s) => String(s.task_id) === String(t.id),
                         );
                         const sessionMinutes = taskSession
                           ? Math.ceil((taskSession.session_time || 0) / 60)
@@ -176,7 +176,7 @@ export default function Summary() {
 
                         return (
                           <li
-                            key={t._id}
+                            key={t.id}
                             className="p-4 bg-slate-700/50 rounded-xl border border-slate-600/30 hover:border-slate-600/60 transition-all"
                           >
                             <div className="flex items-start justify-between gap-4">
@@ -198,9 +198,9 @@ export default function Summary() {
                                     t.priority === "High"
                                       ? "bg-red-500/20 text-red-300"
                                       : t.priority === "medium" ||
-                                        t.priority === "Medium"
-                                      ? "bg-yellow-500/20 text-yellow-300"
-                                      : "bg-green-500/20 text-green-300"
+                                          t.priority === "Medium"
+                                        ? "bg-yellow-500/20 text-yellow-300"
+                                        : "bg-green-500/20 text-green-300"
                                   }`}
                                 >
                                   {t.priority}
@@ -222,7 +222,7 @@ export default function Summary() {
                     <ul className="space-y-3">
                       {dayLearnings.map((l) => {
                         const task = tasks.find(
-                          (t) => String(t._id) === String(l.task_id)
+                          (t) => String(t.id) === String(l.task_id),
                         );
                         return (
                           <li
