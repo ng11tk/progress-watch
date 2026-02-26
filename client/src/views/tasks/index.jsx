@@ -3,18 +3,18 @@ import { Link } from "react-router-dom";
 import api from "../../lib/axios";
 
 const TaskList = () => {
-  const inititalFormState = () => ({
+  const initialFormState = {
     name: "Task Name",
     description: "Task Description",
-    duration: 0.05,
+    duration: 1,
     startDate: new Date().toISOString().split("T")[0],
     targetDate: new Date().toISOString().split("T")[0],
     priority: "Medium",
-  });
+  };
   const [openAddTask, setOpenAddTask] = React.useState(false);
   const [tasks, setTasks] = React.useState([]);
 
-  const [form, setForm] = React.useState(inititalFormState());
+  const [form, setForm] = React.useState(initialFormState);
 
   React.useEffect(() => {
     const onKey = (e) => {
@@ -101,7 +101,7 @@ const TaskList = () => {
     }
 
     setOpenAddTask(false);
-    setForm(inititalFormState());
+    setForm(initialFormState);
   };
 
   return (
@@ -186,9 +186,9 @@ const TaskList = () => {
                         task.priority === "high" || task.priority === "High"
                           ? "bg-red-500/20 text-red-300"
                           : task.priority === "medium" ||
-                            task.priority === "Medium"
-                          ? "bg-yellow-500/20 text-yellow-300"
-                          : "bg-green-500/20 text-green-300"
+                              task.priority === "Medium"
+                            ? "bg-yellow-500/20 text-yellow-300"
+                            : "bg-green-500/20 text-green-300"
                       }`}
                     >
                       {task.priority.charAt(0).toUpperCase() +
