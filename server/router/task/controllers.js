@@ -64,7 +64,7 @@ const getAllTasks = async (req, res) => {
     // add new field named session_status to each task from sessions if session exists for the task
     formattedTasks.forEach((task) => {
       const session = sessions.find(
-        (s) => s.task_id.toString() === task.id.toString()
+        (s) => s.task_id.toString() === task.id.toString(),
       );
       task.session_status = session?.status ? session.status : "idle";
     });
@@ -75,4 +75,46 @@ const getAllTasks = async (req, res) => {
   }
 };
 
-export { createNewTask, getAllTasks };
+// update existing task
+const updateTask = async (req, res) => {
+  try {
+    const {
+      id,
+      title,
+      description,
+      startDate,
+      targetDate,
+      priority,
+      duration,
+    } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Task id is required" });
+    }
+
+    const task = await Task.findOne({ _id: id, user_id: req.userId });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    if (title !== undefined) task.title = title;
+    if (description !== undefined) task.description = description;
+    if (startDate !== undefined) task.start_date = startDate;
+    if (targetDate !== undefined) task.end_date = targetDate;
+    if (priority !== undefined) task.priority = priority.toLowerCase();
+    if (duration !== undefined)
+      task.duration = Number(duration) || task.duration;
+
+    const updatedTask = await task.save();
+
+    res.status(200).json({
+      message: "Task updated successfully",
+      task: updatedTask,
+    });
+  } catch (error) {
+    console.error("Update Task Error:", error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export { createNewTask, getAllTasks, updateTask };

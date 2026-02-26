@@ -14,6 +14,9 @@ const TaskList = () => {
   const [openAddTask, setOpenAddTask] = React.useState(false);
   const [tasks, setTasks] = React.useState([]);
 
+  // when editing an existing task we store it here
+  const [editingTask, setEditingTask] = React.useState(null);
+
   const [form, setForm] = React.useState(initialFormState);
 
   React.useEffect(() => {
@@ -48,12 +51,15 @@ const TaskList = () => {
   }, []);
 
   // handlers
-  const handleOverlayClick = () => setOpenAddTask(false);
+  const handleOverlayClick = () => {
+    setOpenAddTask(false);
+    setEditingTask(null);
+  };
   const handleModalClick = (e) => e.stopPropagation();
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // create new task
+  // create or update task
   const handleSubmit = async () => {
     // list of checks
     if (!form.name.trim()) {
@@ -75,9 +81,8 @@ const TaskList = () => {
       return;
     }
 
-    // add to shared tasks store
-    console.log("Submitting form:", form);
-    const newTask = {
+    // build payload
+    const payload = {
       title: form.name,
       description: form.description,
       startDate: form.startDate,
@@ -86,22 +91,41 @@ const TaskList = () => {
       duration: Number(form.duration) || 25,
     };
 
-    // send task data to backend here
     try {
-      const response = await api.post("/api/task", newTask);
-      if (response.status !== 201) {
-        console.error("Failed to add task to backend:", response);
-        return;
+      let response;
+      if (editingTask) {
+        // update existing task
+        response = await api.patch("/api/task", {
+          id: editingTask.id,
+          ...payload,
+        });
+        if (response.status !== 200) {
+          console.error("Failed to update task on backend:", response);
+          return;
+        }
+        console.log("Task updated on backend:", response.data);
+      } else {
+        // create new task
+        response = await api.post("/api/task", payload);
+        if (response.status !== 201) {
+          console.error("Failed to add task to backend:", response);
+          return;
+        }
+        console.log("Task added to backend:", response.data);
       }
-      console.log("Task added to backend:", response.data);
+
       // refresh task list
       fetchTasks();
     } catch (error) {
-      console.error("Error adding task:", error);
+      console.error(
+        editingTask ? "Error updating task:" : "Error adding task:",
+        error,
+      );
     }
 
     setOpenAddTask(false);
     setForm(initialFormState);
+    setEditingTask(null);
   };
 
   return (
@@ -138,6 +162,7 @@ const TaskList = () => {
                 <th className="p-4 font-semibold">Duration</th>
                 <th className="p-4 font-semibold">Priority</th>
                 <th className="p-4 font-semibold">Status</th>
+                <th className="p-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -200,6 +225,28 @@ const TaskList = () => {
                       Pending
                     </span>
                   </td>
+                  <td className="p-4 align-top">
+                    <button
+                      className="text-blue-400 hover:text-blue-300 underline"
+                      onClick={() => {
+                        // populate form for editing
+                        setEditingTask(task);
+                        setForm({
+                          name: task.title,
+                          description: task.description,
+                          duration: task.duration,
+                          startDate: task.startDate,
+                          targetDate: task.targetDate,
+                          priority:
+                            task.priority.charAt(0).toUpperCase() +
+                            task.priority.slice(1),
+                        });
+                        setOpenAddTask(true);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -219,7 +266,7 @@ const TaskList = () => {
             aria-modal="true"
           >
             <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Add New Task
+              {editingTask ? "Edit Task" : "Add New Task"}
             </h2>
             <label className="sr-only">Task Name</label>
             <input
@@ -298,11 +345,14 @@ const TaskList = () => {
                 className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl py-3 font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-200"
                 onClick={handleSubmit}
               >
-                💾 Save Task
+                {editingTask ? "💾 Update Task" : "💾 Save Task"}
               </button>
               <button
                 className="flex-1 bg-slate-700 hover:bg-slate-600 rounded-xl py-3 font-semibold transition-all duration-200"
-                onClick={() => setOpenAddTask(false)}
+                onClick={() => {
+                  setOpenAddTask(false);
+                  setEditingTask(null);
+                }}
               >
                 Cancel
               </button>
