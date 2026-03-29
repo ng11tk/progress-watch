@@ -48,7 +48,10 @@ const createNewSession = async (req, res) => {
 const getSessionsByTaskId = async (req, res) => {
   const { task_id } = req.query;
   try {
-    const sessions = await Session.find({ task_id, user_id: req.userId });
+    const sessions = await Session.findOne({
+      task_id,
+      user_id: req.userId,
+    }).sort({ createdAt: -1 }); // latest first;
     res.status(200).json(sessions);
   } catch (error) {
     res.status(400).json({ message: error.message });

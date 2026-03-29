@@ -27,7 +27,7 @@ const StopwatchModal = ({ task, onClose }) => {
         const response = await api.get("/api/sessions/task", {
           params: { task_id: task.id },
         });
-        const session = response?.data[0];
+        const session = response?.data;
 
         if (session) {
           if (session.status === "paused") {
@@ -48,9 +48,9 @@ const StopwatchModal = ({ task, onClose }) => {
     };
 
     fetchSession();
-  }, [task]);
+  }, [reset, task, taskDurationInSeconds]);
 
-  // handlers
+  //* handlers
   function computeElapsedSec() {
     return Math.max(0, Math.ceil(taskDurationInSeconds - time));
   }
@@ -168,16 +168,14 @@ const StopwatchModal = ({ task, onClose }) => {
     <div className="bg-slate-700/30 rounded-2xl p-6 border border-slate-600/30">
       {/* ---------------- RUNNING ---------------- */}
       {view === "RUNNING" && (
-        <>
-          <Timer
-            minutes={minutes}
-            seconds={seconds}
-            isRunning={isRunning}
-            start={handleStart}
-            pause={handlePause}
-            onStop={handleStop}
-          />
-        </>
+        <Timer
+          minutes={minutes}
+          seconds={seconds}
+          isRunning={isRunning}
+          start={handleStart}
+          pause={handlePause}
+          onStop={handleStop}
+        />
       )}
 
       {/* ---------------- FINISHED ---------------- */}
